@@ -1,0 +1,16 @@
+{
+  "name": "kml-id-worker",
+  "version": "1.0.0",
+  "description": "根据SnowFlake规则创建id",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "lintry <shenlin00@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "long": "^4.0.0"
+  },
+  "devDependencies": {}
+}
