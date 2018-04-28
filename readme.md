@@ -7,7 +7,7 @@
 ## 安装
 
 ```sh
-npm i id-worker
+npm i kml-id-worker
 ```
 
 
@@ -51,3 +51,45 @@ id生成器根据twitter的SnowFlake算法实现，原算法实现代码见[gith
 ## 提醒
 
 id生成器的计算仅保证在当前机器的进程内并发生成id时，会考虑利用序列号解决id重复的问题。但是如果在生产环境中有多台机器多个服务启动时，要自行保证每个进程创建生成器的初始参数是不同的。
+
+
+
+## 在PostgresQL中创建一个函数
+
+通常在PostgresQL中会使用`sequence`作为id生成器，产生的数字有序，但是无法实现多个服务器并发产生ID且避免重复。如果在PostgresQL中定义一个函数生成id，采用相同逻辑实现代码，即可解决这个问题。
+
+### 定义一个sequence来模拟同一个timestamp里的序列号
+
+```sql
+create sequence seq_snow_flake_id increment by 1 minvalue 1 no maxvalue start with 1;
+```
+
+### 定义函数实现相同的id算法
+
+```sql
+CREATE OR REPLACE FUNCTION "public"."fn_snow_flake_id"("dc_id" int4, "worker_id" int4)
+  RETURNS "pg_catalog"."varchar" AS $BODY$BEGIN
+	
+  RETURN trim(to_char((extract('epoch' from now()) * 1000 - 1513182210789) * power(2,22) :: BIGINT + (((dc_id & 31)<<17) | ((worker_id & 31)<<10)) + (nextval('seq_snow_flake_id') & 4095), '9999999999999999999'));
+END
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100
+```
+
+
+
+### 使用随机函数代替sequence
+
+如果不创建sequence，而用随机函数代替，也能实现算法，但是否会在高并发时产生相同的随机数就要依赖数据库的random函数了。代码可以调整为
+
+```sql
+CREATE OR REPLACE FUNCTION "public"."fn_snow_flake_id"("dc_id" int4, "worker_id" int4)
+  RETURNS "pg_catalog"."varchar" AS $BODY$BEGIN
+	
+  RETURN trim(to_char((extract('epoch' from now()) * 1000 - 1513182210789) * power(2,22) :: BIGINT + (((dc_id & 31)<<17) | ((worker_id & 31)<<10)) + ((random()*10000)::int & 4095), '9999999999999999999'));
+END
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100
+```
