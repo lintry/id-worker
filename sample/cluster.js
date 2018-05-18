@@ -58,7 +58,7 @@ if (cluster.isMaster) {
             if (Number.parseInt(pid) === process.pid) {
                 const idWorker = new IdWorker({datacenterId: 1, workerId: worker_id});
                 for (let i=0;i<2;i++) {
-                    console.log(process.pid, i, idWorker.nextId())
+                    console.log(process.pid, i, idWorker.nextId().toString())
                 }
                 console.log(`I am worker #${cluster.worker.id}`);
                 console.log(`Worker ${process.pid} started`);
