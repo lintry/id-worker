@@ -28,5 +28,5 @@ if (cluster.isMaster) {
 }
 
 for (let i=0;i<40;i++) {
-    console.log(process.pid, i, idCluster.nextId().toString())
+    console.log(process.pid, i, idCluster.nextId())
 }

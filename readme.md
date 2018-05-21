@@ -1,5 +1,5 @@
 # SnowFlake ID
-
+[![NPM](https://nodei.co/npm/kml-id-worker.png)](https://nodei.co/npm/kml-id-worker/)
 根据SnowFlake规则创建id
 
 
@@ -93,3 +93,23 @@ $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100
 ```
+
+
+###警告
+
+因为涉及到大整型的数字运算，使用了`long.js`模块，可以运算53位的整型数字，但是模块的`toNumber`方法有bug，会导致和`toString`不一致，例如：
+
+```javascript
+const Long = require('long')
+const a = new Long(306315265,3377089)
+const b = new Long(306315264,3377089)
+
+console.log(a.toNumber(), a.toString()) // 14504487116996608 '14504487116996609'
+
+console.log(b.toNumber(), b.toString()) // 14504487116996608 '14504487116996608'
+
+```
+
+
+
+很明显，其中的`a`在输出数字型的时候和字符串不同，这是因为Javascript在计算时的误差。所以`nextId()`返回值改成`toString`，如果在获得id后还需要进行计算，可以用`Long.fromString`转换后调用运算方法

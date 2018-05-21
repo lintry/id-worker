@@ -6,9 +6,9 @@
 const Long = require('long');
 const IdWorker = require('..');
 const idWorker = new IdWorker({datacenterId: 3, workerId: 9, workerIdBits: 10, datacenterIdBits: 10, sequenceBits: 2});
-let next_id = idWorker.nextId().toString();
+let next_id = idWorker.nextId();
 for (let i=0;i<20;i++) {
-    next_id = idWorker.nextId().toString();
+    next_id = idWorker.nextId();
 }
 let id = Long.fromString(next_id);
 console.log('id is', next_id);
