@@ -8,14 +8,14 @@ const IdWorker = require('..');
 
 class IdCluster extends IdWorker {
     constructor (config) {
-        let {datacenterId, epoch} = config;
+        let {datacenterId, epoch, debug} = config;
         let workerId = cluster.isMaster ? 0 : cluster.worker.id;
 
-        super({datacenterId, workerId, epoch})
+        super({datacenterId, workerId, epoch, debug})
     }
 }
 
-let idCluster = new IdCluster({datacenterId: 1, workerIdBits: 10, datacenterIdBits: 10, sequenceBits: 2});
+let idCluster = new IdCluster({debug: 1, datacenterId: 1, workerIdBits: 10, datacenterIdBits: 10, sequenceBits: 2});
 if (cluster.isMaster) {
     console.log(`Master ${process.pid} is running`);
 

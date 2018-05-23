@@ -1,6 +1,6 @@
 {
   "name": "kml-id-worker",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "根据SnowFlake规则创建id",
   "main": "index.js",
   "scripts": {
