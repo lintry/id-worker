@@ -85,7 +85,7 @@ $BODY$
 如果不创建sequence，而用随机函数代替，也能实现算法，但是否会在高并发时产生相同的随机数就要依赖数据库的random函数了。代码可以调整为
 
 ```sql
-CREATE OR REPLACE FUNCTION "public"."fn_snow_flake_id"("dc_id" int4, "worker_id" int4, "f" int4 = 0)
+CREATE OR REPLACE FUNCTION "public"."fn_snow_flake_id"("dc_id" int4, "worker_id" int4, "f" bigint = 0)
   RETURNS "pg_catalog"."varchar" AS $BODY$BEGIN
 	
   RETURN trim(to_char((extract('epoch' from now()) * 1000 + f - 1513182210789) * power(2,22) :: BIGINT + (((dc_id & 31)<<17) | ((worker_id & 31)<<10)) + ((random()*10000)::int & 4095), '9999999999999999999'));
