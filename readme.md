@@ -1,5 +1,6 @@
 # SnowFlake ID
 [![NPM](https://nodei.co/npm/kml-id-worker.png)](https://nodei.co/npm/kml-id-worker/)
+
 根据SnowFlake规则创建id
 
 
@@ -84,18 +85,21 @@ $BODY$
 如果不创建sequence，而用随机函数代替，也能实现算法，但是否会在高并发时产生相同的随机数就要依赖数据库的random函数了。代码可以调整为
 
 ```sql
-CREATE OR REPLACE FUNCTION "public"."fn_snow_flake_id"("dc_id" int4, "worker_id" int4)
+CREATE OR REPLACE FUNCTION "public"."fn_snow_flake_id"("dc_id" int4, "worker_id" int4, "f" int4 = 0)
   RETURNS "pg_catalog"."varchar" AS $BODY$BEGIN
 	
-  RETURN trim(to_char((extract('epoch' from now()) * 1000 - 1513182210789) * power(2,22) :: BIGINT + (((dc_id & 31)<<17) | ((worker_id & 31)<<10)) + ((random()*10000)::int & 4095), '9999999999999999999'));
+  RETURN trim(to_char((extract('epoch' from now()) * 1000 + f - 1513182210789) * power(2,22) :: BIGINT + (((dc_id & 31)<<17) | ((worker_id & 31)<<10)) + ((random()*10000)::int & 4095), '9999999999999999999'));
 END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100
 ```
 
+> 有趣的是，通过pgbench测试中，60秒内产生了60余万条数据，而使用随机函数产生的id重复率在40~60左右，而使用了sequence产生的重复id要高达上千条。可能的原因是因为随机参数的数据分布更广，在与上4095后产生的数据更分散。
 
-###警告
+
+
+### 警告
 
 因为涉及到大整型的数字运算，使用了`long.js`模块，可以运算53位的整型数字，但是模块的`toNumber`方法有bug，会导致和`toString`不一致，例如：
 
